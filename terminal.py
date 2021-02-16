@@ -1,4 +1,6 @@
 import logging
+import xml.etree.ElementTree as ET
+
 import requests
 
 
@@ -43,10 +45,19 @@ class Terminal:
         print(r.text)
 
     def get_status(self):
-        return self._post('status.xml')
+        return self._postforxml('status.xml')
 
     def get_rssi(self):
-        return self._post('statusg.xml')
+        return self._postforxml('statusg.xml')
+
+    def get_geoposition(self):
+        return self._postforxml('status2.xml')
+
+    def get_counters(self):
+        return self._postforxml('statusc.xml')
+
+    def _postforxml(self, path):
+        return ET.fromstring(self._post(path))
 
     def _post(self, path, params=None):
         with requests.Session() as s:
@@ -54,4 +65,5 @@ class Terminal:
             s.auth = (self.user, self.passwd)
             url = f'http://{self.host}:{self.port}/{path}'
             r = s.post(url, params=params)
+            r.encoding = 'windows-1251'
             return r.text
