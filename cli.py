@@ -29,8 +29,10 @@ class App(Cmd):
         self.term = Terminal(self.host, self.port, self.user, self.passwd)
 
     def do_status(self, _):
-        status = self.term.get_status()
-        print(status)
+        print(self.term.get_status())
+
+    def do_rssi(self, _):
+        print(self.term.get_rssi())
 
 
 def main():

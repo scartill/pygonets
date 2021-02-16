@@ -43,7 +43,10 @@ class Terminal:
         print(r.text)
 
     def get_status(self):
-        self._post('status.xml')
+        return self._post('status.xml')
+
+    def get_rssi(self):
+        return self._post('statusg.xml')
 
     def _post(self, path, params=None):
         with requests.Session() as s:
