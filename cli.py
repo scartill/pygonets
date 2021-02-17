@@ -30,7 +30,6 @@ def xprintfield(xml, field: str):
 
 
 _init_ap = argparse.ArgumentParser()
-_init_ap.add_argument('ID', type=int)
 
 _send_ap = argparse.ArgumentParser()
 _send_ap.add_argument('to')
@@ -45,7 +44,7 @@ class App(cmd2.Cmd):
         self.user = 'user'
         self.passwd = 'user'
         self.term = None
-        self.comm_type = CommType.HYBRID
+        self.comm_type = CommType.SATCOM
         self.priority = Priority.NORMAL
 
     def do_host(self, host):
@@ -57,9 +56,9 @@ class App(cmd2.Cmd):
         self.port = port
 
     @cmd2.with_argparser(_init_ap)
-    def do_init(self, args):
-        logging.debug(f'Creating interface {self.host}:{self.port} for terminal {args.ID}')
-        self.term = Terminal(self.host, self.port, self.user, self.passwd, args.ID)
+    def do_init(self, _):
+        logging.debug(f'Creating interface {self.host}:{self.port}')
+        self.term = Terminal(self.host, self.port, self.user, self.passwd)
 
     def do_status(self, field):
         xprintfield(self.term.get_status(), field)
@@ -75,7 +74,7 @@ class App(cmd2.Cmd):
 
     @cmd2.with_argparser(_send_ap)
     def do_send(self, args):
-        self.term.send_message(args.to, self.priority, self.comm_type, args.subject, args.text)
+        self.term.send_message(args.to, self.priority, self.comm_type, args.text)
 
 
 def main():

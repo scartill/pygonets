@@ -1,4 +1,5 @@
 import logging
+import json
 import xml.etree.ElementTree as ET
 
 import requests
@@ -23,32 +24,42 @@ class GonetsException(ValueError):
 
 
 class Terminal:
-    def __init__(self, host: str, port: int, user: str, passwd: str, this_id: int):
+    def __init__(self, host: str, port: int, user: str, passwd: str):
         self.host = host
         self.port = port
         self.user = user
         self.passwd = passwd
-        self.this_id = this_id
 
-    def send_message(self, to_id: str, priority: int, comm_type: int, subject: str, text: str) -> bool:
+    def send_message(self, to_id: str, priority: int, comm_type: int, text: str):
         if len(text) > MAX_TEXT_LEN:
             raise ValueError("Text is too long")
 
         message = {
-            'from': self.this_id,
             'to': to_id,
-            'priority': priority,
+            'urgency': priority,
             'chSv': comm_type,
-            'subj': subject,
+            'subj': 'msg',
+            'kvs': '000',  # Undocumented
             'msg': text
         }
 
-        url = f'http://{self.host}:{self.port}/sendmsg.htm'
-        r = requests.post(url, params=message, auth=(self.user, self.passwd))
+        with requests.Session() as s:
+            url = f'http://{self.host}:{self.port}/sendmsg2.xip'
+            logging.debug(f'Sending message with {text}')
+            s.auth = (self.user, self.passwd)
 
-        logging.debug(f'Received {r.text}')
-        if 'OK' not in r.text:
-            raise GonetsException('Unable tot send')
+            # ND: not using standard urlencode
+            payload_str = '&' + '&'.join('%s=%s' % (k,v) for k,v in message.items())
+            logging.debug(f'Raw data {payload_str}')
+
+            r = requests.post(url, data=payload_str, auth=(self.user, self.passwd)).json()
+
+            logging.debug(f'Received {json.dumps(r, indent=2)}')
+            err = r[0]['err']
+
+            if err != 0:
+                raise GonetsException(f'Unable to send ({err})')
+
 
     def get_status(self):
         return self._postforxml('status.xml')
