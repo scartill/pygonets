@@ -1,10 +1,11 @@
 import logging
+import argparse
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-from cmd2 import Cmd
+import cmd2
 
-from terminal import Terminal
+from terminal import Terminal, CommType, Priority
 
 
 def prettify(elem):
@@ -28,7 +29,15 @@ def xprintfield(xml, field: str):
             print(elem.text)
 
 
-class App(Cmd):
+_init_ap = argparse.ArgumentParser()
+_init_ap.add_argument('ID', type=int)
+
+_send_ap = argparse.ArgumentParser()
+_send_ap.add_argument('to')
+_send_ap.add_argument('subject')
+_send_ap.add_argument('text')
+
+class App(cmd2.Cmd):
     def __init__(self):
         super().__init__()
         self.host = '192.168.1.55'
@@ -36,6 +45,8 @@ class App(Cmd):
         self.user = 'user'
         self.passwd = 'user'
         self.term = None
+        self.comm_type = CommType.HYBRID
+        self.priority = Priority.NORMAL
 
     def do_host(self, host):
         logging.debug(f'Setting host to {host}')
@@ -45,9 +56,10 @@ class App(Cmd):
         logging.debug(f'Setting port to {port}')
         self.port = port
 
-    def do_init(self, _):
-        logging.debug(f'Creating interface {self.host}:{self.port}')
-        self.term = Terminal(self.host, self.port, self.user, self.passwd)
+    @cmd2.with_argparser(_init_ap)
+    def do_init(self, args):
+        logging.debug(f'Creating interface {self.host}:{self.port} for terminal {args.ID}')
+        self.term = Terminal(self.host, self.port, self.user, self.passwd, args.ID)
 
     def do_status(self, field):
         xprintfield(self.term.get_status(), field)
@@ -60,6 +72,10 @@ class App(Cmd):
 
     def do_counters(self, field):
         xprintfield(self.term.get_counters(), field)
+
+    @cmd2.with_argparser(_send_ap)
+    def do_send(self, args):
+        self.term.send_message(args.to, self.priority, self.comm_type, args.subject, args.text)
 
 
 def main():

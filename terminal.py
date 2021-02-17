@@ -18,19 +18,24 @@ class CommType:
     GSM = 2
 
 
+class GonetsException(ValueError):
+    pass
+
+
 class Terminal:
-    def __init__(self, host: str, port: int, user: str, passwd: str):
+    def __init__(self, host: str, port: int, user: str, passwd: str, this_id: int):
         self.host = host
         self.port = port
         self.user = user
         self.passwd = passwd
+        self.this_id = this_id
 
-    def send_message(self, from_id: int, to_id: int, priority: int, comm_type: int, subject: str, text: str):
+    def send_message(self, to_id: str, priority: int, comm_type: int, subject: str, text: str) -> bool:
         if len(text) > MAX_TEXT_LEN:
             raise ValueError("Text is too long")
 
         message = {
-            'from': from_id,
+            'from': self.this_id,
             'to': to_id,
             'priority': priority,
             'chSv': comm_type,
@@ -39,10 +44,11 @@ class Terminal:
         }
 
         url = f'http://{self.host}:{self.port}/sendmsg.htm'
-        logging.debug(f'Sending message with {url}')
         r = requests.post(url, params=message, auth=(self.user, self.passwd))
 
-        print(r.text)
+        logging.debug(f'Received {r.text}')
+        if 'OK' not in r.text:
+            raise GonetsException('Unable tot send')
 
     def get_status(self):
         return self._postforxml('status.xml')
