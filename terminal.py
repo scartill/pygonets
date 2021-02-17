@@ -49,7 +49,7 @@ class Terminal:
             s.auth = (self.user, self.passwd)
 
             # ND: not using standard urlencode
-            payload_str = '&' + '&'.join('%s=%s' % (k,v) for k,v in message.items())
+            payload_str = '&' + '&'.join('%s=%s' % (k, v) for k, v in message.items())
             logging.debug(f'Raw data {payload_str}')
 
             r = requests.post(url, data=payload_str, auth=(self.user, self.passwd)).json()
@@ -59,7 +59,6 @@ class Terminal:
 
             if err != 0:
                 raise GonetsException(f'Unable to send ({err})')
-
 
     def get_status(self):
         return self._postforxml('status.xml')

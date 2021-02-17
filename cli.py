@@ -36,6 +36,7 @@ _send_ap.add_argument('to')
 _send_ap.add_argument('subject')
 _send_ap.add_argument('text')
 
+
 class App(cmd2.Cmd):
     def __init__(self):
         super().__init__()
