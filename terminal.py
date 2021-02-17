@@ -32,7 +32,7 @@ class Terminal:
 
     def send_message(self, to_id: str, priority: int, comm_type: int, text: str):
         if len(text) > MAX_TEXT_LEN:
-            raise ValueError("Text is too long")
+            raise ValueError('Text is too long')
 
         message = {
             'to': to_id,
@@ -48,7 +48,7 @@ class Terminal:
             logging.debug(f'Sending message with {text}')
             s.auth = (self.user, self.passwd)
 
-            # ND: not using standard urlencode
+            # NB: not using standard urlencode
             payload_str = '&' + '&'.join('%s=%s' % (k, v) for k, v in message.items())
             logging.debug(f'Raw data {payload_str}')
 
