@@ -1,1 +1,1 @@
-from terminal import Terminal  # noqa F401
+from .terminal import Terminal  # noqa F401

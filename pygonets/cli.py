@@ -5,7 +5,7 @@ from xml.dom import minidom
 
 import cmd2
 
-from terminal import Terminal, CommType, Priority
+from pygonets.terminal import Terminal, CommType, Priority
 
 
 def prettify(elem):
